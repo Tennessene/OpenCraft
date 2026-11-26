@@ -55,3 +55,4 @@ The menu scene has **not** been opened in Unity since these changes. Objects tha
 ## 2026-11-26 (later)
 
 - **Added** `Assets/OpenCraft/OpenCraftLoaderFeature.cs`, an original OpenXR feature that does nothing at runtime. It declares a custom runtime loader for Android, so Unity's OpenXR package leaves its own `openxr_loader.aar` out of the APK and Pojlib's loader is the only one. Upstream got the same result as a side effect of the PICO SDK's `PICOFeature`, which is now removed. OpenCraft's build hook (`tools/unity/OpenCraftBuild.cs`, outside this folder) enables the feature for Android before each build.
+- `Assets/Plugins/Android/gradleTemplate.properties`: adds `android.jetifier.ignorelist=Pojlib-release.*`, so Unity's Gradle build doesn't run Jetifier over the Pojlib AAR. Jetifier can't read the Java 25 class files Pojlib carries for 26.x versions, and Pojlib doesn't use the old support library that Jetifier rewrites.

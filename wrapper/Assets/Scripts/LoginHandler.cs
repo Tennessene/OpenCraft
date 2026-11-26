@@ -1,3 +1,4 @@
+// Modified for OpenCraft (2026-11-26): no longer creates an empty launcher.conf, and copes when the config is missing.
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
@@ -30,12 +31,11 @@ public class LoginHandler : MonoBehaviour
     public void Start()
     {
 	    configPath = Application.persistentDataPath + "/launcher.conf";
-	    if (!File.Exists(configPath))
-	    {
-		    File.Create(configPath).Close();
-	    }
-	    configFile = File.ReadAllText(configPath);
-	    config = JsonConvert.DeserializeObject<ConfigHandler.Config>(configFile);
+	    // ConfigHandler (run from JNIStorage, which starts first) writes the config; read it if it's there.
+	    configFile = File.Exists(configPath) ? File.ReadAllText(configPath) : "";
+	    config = JsonConvert.DeserializeObject<ConfigHandler.Config>(configFile)
+	             ?? new ConfigHandler.Config { accounts = new List<ConfigHandler.Accounts>() };
+	    if (config.accounts == null) config.accounts = new List<ConfigHandler.Accounts>();
 	    ParseAccounts();
 	    Login();
     }

@@ -1,3 +1,4 @@
+// Modified for OpenCraft (2026-11-26): runs before other scripts, so Pojlib, the activity and the config are ready when they start.
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,6 +8,7 @@ using UnityEngine;
 using UnityEngine.CrashReportHandler;
 using UnityEngine.XR.Management;
 
+[DefaultExecutionOrder(-100)]
 public class JNIStorage : MonoBehaviour
 {
     public static AndroidJavaClass apiClass;

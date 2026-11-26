@@ -1,4 +1,4 @@
-// Modified for OpenCraft (2026-11-26): community links point to the OpenCraft GitHub repo instead of upstream Discord, X and website (method names kept because scene buttons bind to them).
+// Modified for OpenCraft (2026-11-26): community links point to the OpenCraft GitHub repo instead of upstream Discord, X and website (method names kept because scene buttons bind to them); opening the agreement checks whether Continue can be enabled.
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -160,6 +160,8 @@ public class WindowHandler : MonoBehaviour
     public void LegalSetter()
     {
         legalPanel.SetActive(!legalPanel.activeSelf);
+        // A short agreement never scrolls, so check right away whether Continue can be enabled.
+        if (legalPanel.activeSelf) FindObjectOfType<UIHandler>()?.UpdateLegalButton();
     }
     
     public void OpenDiscord()

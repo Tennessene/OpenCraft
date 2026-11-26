@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Draws OpenCraft's original replacement images for the Unity wrapper.
+"""Draws OpenCraft's icon, wordmark and link symbols for the Unity wrapper.
 
 Each image overwrites an existing file at the same path and size, so Unity
 keeps the .meta file (and its GUID) and every scene reference still resolves.
@@ -143,84 +143,6 @@ def wordmark():
     c.save("Assets/Resources/Pojav_x_Vivecraft.png")
 
 
-def play_tile():
-    c = Canvas(512, 512, GREEN)
-    # a blocky "play" triangle
-    play = [
-        "................",
-        "................",
-        "................",
-        ".....#..........",
-        ".....##.........",
-        ".....###........",
-        ".....####.......",
-        ".....#####......",
-        ".....#####......",
-        ".....####.......",
-        ".....###........",
-        ".....##.........",
-        ".....#..........",
-        "................",
-        "................",
-        "................",
-    ]
-    blit_grid(c, play, {"#": PAPER}, 32, 16, 0)
-    c.save("Assets/Resources/UI/Minecraft.png")
-
-
-def speckle(w, h, base, spread, seed, cell=4):
-    rnd = random.Random(seed)
-    c = Canvas(w, h, base)
-    for y in range(0, h, cell):
-        for x in range(0, w, cell):
-            d = rnd.randint(-spread, spread)
-            col = [max(0, min(255, base[i] + d)) for i in range(3)] + [255]
-            c.rect(x, y, x + cell, y + cell, col)
-    return c
-
-
-def panel_background():
-    c = speckle(828, 1000, (28, 52, 84, 255), 10, 7, cell=12)
-    c.rect(0, 0, 828, 24, GREEN)
-    c.rect(0, 24, 828, 36, GREEN_LO)
-    c.save("Assets/Resources/questerBackground.png")
-
-
-def main_background():
-    c = Canvas(1267, 665)
-    c.gradient(NAVY, BLUE)
-    for x in range(0, 1267, 40):
-        c.rect(x, 0, x + 2, 665, (255, 255, 255, 18))
-    for y in range(0, 665, 40):
-        c.rect(0, y, 1267, y + 2, (255, 255, 255, 18))
-    c.rect(0, 600, 1267, 665, (91, 58, 30, 255))
-    c.rect(0, 588, 1267, 604, GREEN)
-    c.save("Assets/Resources/UI/Background.png")
-
-
-def small_strips():
-    speckle(16, 176, (196, 92, 38, 255), 30, 11, cell=2).save("Assets/Resources/magmapillar.png")
-    speckle(16, 3, (120, 88, 56, 255), 20, 13, cell=1).save("Assets/Resources/trapdoorside.png")
-
-
-def default_skin():
-    # 64x64 player skin laid out by body part, in plain original colours.
-    c = Canvas(64, 64, CLEAR)
-    skin, shirt, pants, hair, shoes = (214, 170, 130, 255), (63, 163, 77, 255), (31, 78, 121, 255), (60, 40, 30, 255), (40, 40, 40, 255)
-    c.rect(0, 0, 32, 16, skin)          # head
-    c.rect(8, 0, 24, 8, hair)           # top of head
-    c.rect(0, 8, 32, 10, hair)          # hairline around the head
-    c.rect(16, 16, 40, 32, shirt)       # body
-    c.rect(40, 16, 56, 32, skin)        # right arm
-    c.rect(44, 20, 48, 24, shirt)       # sleeve
-    c.rect(32, 48, 48, 64, skin)        # left arm
-    c.rect(0, 16, 16, 32, pants)        # right leg
-    c.rect(16, 48, 32, 64, pants)       # left leg
-    c.rect(0, 28, 16, 32, shoes)
-    c.rect(16, 60, 32, 64, shoes)
-    c.save("Assets/Resources/SkinResources/skin.png")
-
-
 def link_glyphs():
     # Plain "chat" and "link" symbols in white, used where third-party logos were.
     chat = Canvas(528, 400, CLEAR)
@@ -242,9 +164,4 @@ def link_glyphs():
 if __name__ == "__main__":
     app_icon()
     wordmark()
-    play_tile()
-    panel_background()
-    main_background()
-    small_strips()
-    default_skin()
     link_glyphs()

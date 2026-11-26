@@ -45,13 +45,13 @@ By default the APK is signed with Unity's debug key. To use your own key, set `O
 
 ## What to expect
 
-- **This build hasn't been tested on a headset yet.** The combination comes from upstream's newest code:
+- **It's based on upstream's newest code,** which was never released as a finished version:
   - Pojlib `0e22a02` (July 2026)
   - wrapper `5aeb178` (March 2026)
 
-  That code was never released as a finished version.
-- **The menu room is empty.** Its scenery was removed because it used game textures. See `wrapper/MODIFICATIONS.md`.
-- **Pico headsets aren't supported right now.** The PICO SDK was removed until its license is checked.
+  On a Quest 2 the launcher starts and OpenXR works. Playing the game hasn't been confirmed yet.
+- **The lobby's block textures come from your game.** Until a game version has downloaded, the lobby shows flat colours. Afterwards it shows the real textures from the next start on. See `wrapper/MODIFICATIONS.md`.
+- **Pico headsets aren't supported.** The PICO SDK's licence doesn't allow redistributing it.
 - **Some parts are prebuilt binaries, not built here:**
   - the native libraries in `pojlib/src/main/jniLibs/`
   - `pojlib/src/main/assets/lwjgl/lwjgl-glfw-classes.jar`

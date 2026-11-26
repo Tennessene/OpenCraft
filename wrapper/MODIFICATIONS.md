@@ -1,60 +1,49 @@
 # Changes made for OpenCraft
 
-This is a modified copy of [QCXR-XR-Wrapper](https://github.com/QuestCraftPlusPlus/QCXR-XR-Wrapper), based on upstream commit `5aeb178` ("Callback fixes", 2026-03-16). It stays under the GNU LGPL v3 in [LICENSE](LICENSE).
+This folder is OpenCraft's copy of [QCXR-XR-Wrapper](https://github.com/QuestCraftPlusPlus/QCXR-XR-Wrapper), based on upstream commit `5aeb178` ("Callback fixes", 2026-03-16). It's licensed under the GNU LGPL v3 in [LICENSE](LICENSE). C# files that were changed start with a `// Modified for OpenCraft` comment. The other changes are listed below.
 
-The C# scripts that changed carry a `// Modified for OpenCraft` line at the top. Unity scene, asset and image files can't hold such a comment, so they're listed here instead.
+## Name and links
 
-## 2026-11-26
-
-**Branding and links**
 - `ProjectSettings/ProjectSettings.asset`:
   - The product, company and project names are now "OpenCraft".
   - The Android app ID is `io.github.tennessene.opencraft`.
-  - The upstream signing keystore setting is cleared, so builds use your own key or Unity's debug key.
-- `ProjectSettings/AndroidResolverDependencies.xml` and `Assets/Resources/PicoSdkPCConfig.json`: new app ID.
-- `Assets/Scripts/*.cs` (11 files):
+  - The upstream signing keystore is cleared. Builds use your own key, or Unity's debug key if you don't set one.
+- `ProjectSettings/AndroidResolverDependencies.xml`, `Assets/Resources/PicoSdkPCConfig.json`: the new app ID.
+- `Assets/Scripts/*.cs`:
   - Web requests identify themselves as OpenCraft.
   - Release notes come from the OpenCraft repo.
-  - The Discord, X and website buttons open the OpenCraft GitHub page. The method names are unchanged, because the scene's buttons bind to them.
-  - Two storage paths now follow the app ID.
-- `Assets/Scenes/Main.unity` and `Assets/Resources/Crowdin/CrowdinTranslations.asset`: these texts were replaced with OpenCraft's own wording:
+  - The community buttons open OpenCraft's GitHub page. Their method names are unchanged, because scene buttons bind to them.
+  - Storage paths follow the app ID.
+- `Assets/Scenes/Main.unity`, `Assets/Resources/Crowdin/CrowdinTranslations.asset`: these texts use OpenCraft wording:
   - the welcome screen
-  - the end-user license agreement
+  - the licence notice and agreement
   - the open-source notice
-  - the agree statement
-  - the Discord invite line
   - the support hint
   - the sample changelog
   - the placeholder username
+- `Assets/Resources/Materials/export202201252311597020.png` (app icon), `Assets/Resources/Pojav_x_Vivecraft.png` (wordmark): OpenCraft's own icon and wordmark.
+- `Assets/Resources/UI/Discord-Symbol-White.png`, `Assets/Resources/UI/X Logo.png`: plain chat and link symbols, since those buttons now open GitHub.
+- `OpenCraft/branding/make_images.py`: draws the four images above.
 - `README.md`: new title and introduction. The original credits are kept.
-- `.gitignore`: the build backup folder pattern uses the new product name.
 
-**Images replaced with original artwork** (same file paths, sizes and Unity GUIDs). They're drawn by `OpenCraft/branding/make_images.py`:
-- `Assets/Resources/Materials/export202201252311597020.png` (app icon)
-- `Assets/Resources/Pojav_x_Vivecraft.png` (wordmark)
-- `Assets/Resources/UI/Minecraft.png` (launch button)
-- `Assets/Resources/UI/Background.png`
-- `Assets/Resources/questerBackground.png`
-- `Assets/Resources/magmapillar.png`
-- `Assets/Resources/trapdoorside.png`
-- `Assets/Resources/SkinResources/skin.png` (default player skin)
-- `Assets/Resources/UI/Discord-Symbol-White.png` and `Assets/Resources/UI/X Logo.png` (now plain chat and link symbols)
+## Lobby
 
-**Removed**
-- `Assets/QCWorld/` and `Assets/WinterLodge/`. The menu-room scenery was exported from the game and used its block textures.
-- `Assets/SkySeries Freebie/`. This skybox pack's redistribution terms couldn't be verified.
-- `Packages/LocalPackages/PICO Unity OpenXR Integration SDK-1.3.0/`. Its license couldn't be verified, so it's gone from `Packages/manifest.json`, `Packages/packages-lock.json` and `ProjectSettings/EditorBuildSettings.asset` as well. Without it, Pico headsets aren't supported. Quest headsets aren't affected.
-- `Assets/Scenes/Main/`. These were baked lightmaps for the removed scenery. The scene's lighting-data reference was cleared to match.
+- The lobby scenery (`Assets/WinterLodge`, `Assets/QCWorld`) and its baked lighting (`Assets/Scenes/Main`) are upstream's.
+- **Game textures are loaded from the player's game.** Some lobby textures were exported from the game itself. Those 122 files are placeholders here, named `gametex.<path>.png`: same size as the originals, filled with each one's average colour. `Assets/OpenCraft/GameTextureLoader.cs` swaps in the real textures from the newest game version the launcher has downloaded. `OpenCraft/branding/make_game_texture_placeholders.py` made the placeholders.
+- **Sky:** `Assets/OpenCraft/OpenCraftSky.mat` uses Unity's built-in procedural sky. Upstream used the "SkySeries Freebie" skybox pack, which isn't included because its licence doesn't allow redistribution.
 
-**Added**
-- `Assets/OpenCraft/OpenCraftSky.mat`: a sky using Unity's built-in procedural sky shader, now set as the scene's skybox.
-- `OpenCraft/branding/make_images.py`: generates the images listed above.
+## Headset support
 
-The menu scene has **not** been opened in Unity since these changes. Objects that pointed at the removed scenery now have missing references and won't draw. The menu should still load, but it will look empty until new scenery is added.
+- **PICO SDK not included.** Upstream bundles PICO's Unity OpenXR SDK, whose licence forbids redistribution. So:
+  - Pico headsets aren't supported.
+  - `Packages/manifest.json`, `Packages/packages-lock.json` and `ProjectSettings/EditorBuildSettings.asset` no longer reference it.
+- **OpenXR loader.** `Assets/OpenCraft/OpenCraftLoaderFeature.cs` is an OpenXR feature that only declares that Android brings its own loader. This makes Unity leave its copy out, and Pojlib's loader is used. Upstream got the same effect from PICO's feature.
+- **Controllers and the loader feature at build time.** OpenCraft's build hook (`tools/unity/OpenCraftBuild.cs`, at the repo root) enables that feature. It also turns on Unity's Meta Quest Touch, Touch Plus and Touch Pro controller profiles, which replace the PICO controller profiles upstream relied on.
 
-## 2026-11-26 (later)
+## Android build
 
-- **Added** `Assets/OpenCraft/OpenCraftLoaderFeature.cs`, an original OpenXR feature that does nothing at runtime. It declares a custom runtime loader for Android, so Unity's OpenXR package leaves its own `openxr_loader.aar` out of the APK and Pojlib's loader is the only one. Upstream got the same result as a side effect of the PICO SDK's `PICOFeature`, which is now removed. OpenCraft's build hook (`tools/unity/OpenCraftBuild.cs`, outside this folder) enables the feature for Android before each build.
-- `Assets/Plugins/Android/gradleTemplate.properties`: adds `android.jetifier.ignorelist=Pojlib-release.*`, so Unity's Gradle build doesn't run Jetifier over the Pojlib AAR. Jetifier can't read the Java 25 class files Pojlib carries for 26.x versions, and Pojlib doesn't use the old support library that Jetifier rewrites.
-- `Assets/Plugins/Android/mainTemplate.gradle`: lists every library Pojlib needs at runtime, because an AAR doesn't carry its dependencies. The upstream list had fallen behind Pojlib 6.0.1. Without Gson, the launcher crashed as soon as it started. Added Gson 2.12.1, Commons Math 3.6.1, AndroidX Core/Annotation, Commons Compress 1.27.1 and XZ 1.10. Commons IO (2.13.0) and MSAL4J (1.17.2) now match Pojlib's versions.
-- `Assets/Plugins/Android/mainTemplate.gradle`, `pojlib/build.gradle`: pinned versions that Unity 2022.3's dexer (D8 4.0.52) can handle: MSAL4J 1.17.0, Commons Compress 1.21 and XZ 1.9. `error_prone_annotations` is left out, because it's only needed at compile time. D8 crashed on xz 1.10, json-smart 2.5.1, commons-lang3 3.16 and error_prone_annotations 2.36.
+- `Assets/Plugins/Android/mainTemplate.gradle`:
+  - Lists every library Pojlib needs at runtime, because an AAR doesn't carry its dependencies. Upstream's list was missing Gson, so the launcher crashed on start.
+  - Versions are chosen so Unity 2022.3's dexer (D8 4.0.52) can process them: MSAL4J 1.17.0, Commons Compress 1.21, XZ 1.9, no `error_prone_annotations`.
+- `Assets/Plugins/Android/gradleTemplate.properties`: Jetifier skips the Pojlib AAR. It can't read the Java 25 classes Pojlib carries for 26.x versions, and Pojlib has no old support-library code to rewrite anyway.
+- `.gitignore`: the build backup folder uses the new product name.

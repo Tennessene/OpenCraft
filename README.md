@@ -12,7 +12,7 @@ This repository contains everything needed to build the headset app from source.
 
 - A launcher app that runs on the headset. It handles sign-in, versions and mods.
 - The game itself, running in VR through the Vivecraft mod.
-- Game versions 1.19.2, 1.19.4, 1.20.1, 1.20.4, 1.20.6, 1.21.1 and 1.21.4.
+- Game versions 1.19.2 through 1.21.11. The full list is in [`pojlib/supportedVersions.json`](pojlib/supportedVersions.json).
 - Multiplayer on regular servers.
 
 Support for 26.x versions is being worked on in a separate branch.
@@ -32,7 +32,7 @@ Then:
 3. On the headset, open your app library, switch the filter to **Unknown Sources** and start OpenCraft.
 4. Sign in, pick a version and press **Play**. The first start of each version downloads a lot of files, so leave the headset on until it finishes.
 
-The app still uses the package name `com.qcxr.qcxr`. If another app with that package name is already installed, uninstall it first. Uninstalling it also removes that app's saved worlds, so copy them off the headset beforehand.
+OpenCraft installs as `io.github.tennessene.opencraft`, so it can sit alongside other launchers.
 
 ## Building from source
 
@@ -41,10 +41,11 @@ The app still uses the package name `com.qcxr.qcxr`. If another app with that pa
 | `wrapper/` | The Unity project for the headset app. Building it gives you the APK. |
 | `pojlib/` | The Android library that downloads the game, Java and mods and starts the game. |
 
+Both are modified copies of LGPL-3.0 projects. Each folder's `MODIFICATIONS.md` lists what changed.
+
 ```bash
-git clone --recurse-submodules https://github.com/Tennessene/OpenCraft.git
+git clone https://github.com/Tennessene/OpenCraft.git
 cd OpenCraft
-./scripts/setup.sh
 ./scripts/build-pojlib.sh
 ./scripts/build-apk.sh
 ```

@@ -1,62 +1,56 @@
-# Building OpenCraft from source
+# Building OpenCraft
 
-OpenCraft 6.0.0 is based on QuestCraft 6.0.0. This repo pins the exact source that QuestCraft 6.0.0 (released 31 May 2025,
-`QCXR-6.0.0.apk`) was built from:
+OpenCraft has two parts. Each one builds separately:
 
-| Part | Repo | Pinned commit | Why this commit |
-|---|---|---|---|
-| Launcher library | [Pojlib](https://github.com/QuestCraftPlusPlus/Pojlib) | `9bc13f4` (28 May 2025) | The `Pojlib-release.aar` committed into the wrapper on 28 May was built from it |
-| Unity app / launcher | [QCXR-XR-Wrapper](https://github.com/QuestCraftPlusPlus/QCXR-XR-Wrapper) | `2d5f396` (30 May 2025) | Last wrapper commit before the release |
+| Folder | What it is | Builds into |
+|---|---|---|
+| `pojlib/` | Android library that downloads Java, the game and mods, and starts the game | `Pojlib-release.aar` |
+| `wrapper/` | Unity project for the headset app | the APK |
 
-The upstream projects never tagged the wrapper. These pins were worked out from
-commit dates, so treat them as a best match, not an official one.
+Each part is a modified copy of an upstream LGPL-3.0 project. Its `MODIFICATIONS.md` gives the upstream commit it started from and every change made since. Pojlib is a separate library inside the app, so you can swap in your own build of it. `build-pojlib.sh` shows how.
 
 ## What you need
 
-- macOS, Linux or Windows
-- `git` and `git-lfs`
-- **For Pojlib:** JDK 11 or 17, Android SDK (platform `android-34`,
-  build-tools `30.0.3`) and NDK `26.1.10909125` (r26b)
-- **For the APK:** Unity Hub, Unity **2022.3.60f1** with Android Build Support
-  (tick OpenJDK and Android SDK & NDK Tools), signed in with a Unity account.
-  A free Personal license works.
+- macOS, Linux or Windows, with `git`
+- **For `pojlib/`:**
+  - JDK 11 or 17
+  - Android SDK with platform `android-34` and build-tools `30.0.3`
+  - Android NDK `26.1.10909125` (r26b)
+- **For the APK:**
+  - Unity Hub
+  - Unity **2022.3.62f3** (2022 LTS), with the Android Build Support module (tick OpenJDK and Android SDK & NDK Tools)
+  - a Unity account signed in to Unity Hub (a free Personal license works)
 
 ## Steps
 
 ```bash
-git clone --recurse-submodules https://github.com/Tennessene/OpenCraft.git
+git clone https://github.com/Tennessene/OpenCraft.git
 cd OpenCraft
-./scripts/setup.sh          # fetch pinned submodules + LFS files
-./scripts/build-pojlib.sh   # optional: rebuild Pojlib-release.aar from source
-./scripts/build-apk.sh      # build build/OpenCraft-6.0.0.apk with Unity
+./scripts/build-pojlib.sh   # builds pojlib/ and copies the AAR into wrapper/
+./scripts/build-apk.sh      # builds build/OpenCraft.apk with Unity
 ```
 
-If you skip `build-pojlib.sh`, the APK uses the prebuilt AAR that ships in the
-wrapper repo.
+If you skip `build-pojlib.sh`, the APK uses the prebuilt `Pojlib-release.aar` already in `wrapper/Assets/Plugins/Android/`. That file came from upstream and is older than the code in `pojlib/`.
 
-Install the APK with SideQuest or `adb install`. It is signed with your key
-(or Unity's debug key), not the QuestCraft team's. Android won't install it
-over the official app, so uninstall QuestCraft first. Uninstalling deletes its
-data in `Android/data/com.qcxr.qcxr`, so back up your worlds first.
+By default the APK is signed with Unity's debug key. To use your own key, set `OPENCRAFT_KEYSTORE`, `OPENCRAFT_KEYSTORE_PASS`, `OPENCRAFT_KEY_ALIAS` and `OPENCRAFT_KEY_PASS`.
 
-## Limits
+## What to expect
 
-- **Not byte-for-byte identical.** The signature, the build timestamps and
-  Unity's output will differ from the official APK.
-- **Some binaries are prebuilt upstream.** Pojlib commits native libraries
-  (`libltw.so`, LWJGL `.so` files, `libopenxr_loader.so`) and
-  `lwjgl-glfw-classes.jar`. The wrapper bundles the PICO OpenXR SDK and other
-  Unity packages. They come from their own projects (LTW, LWJGL, OpenJDK) and
-  are not rebuilt here.
-- **The game downloads at runtime.** Minecraft, the Java runtime, Fabric,
-  Vivecraft and the default mods download on first launch, as the official app
-  does. Which versions you can play comes from `supportedVersions.json` and
-  `mods.json` in Pojlib.
-- The version string inside the APK reads `6.0.0-RC4.1`. That's how upstream
-  set it at this commit.
+- **This build hasn't been tested on a headset yet.** The combination comes from upstream's newest code:
+  - Pojlib `0e22a02` (July 2026)
+  - wrapper `5aeb178` (March 2026)
+
+  That code was never released as a finished version.
+- **The menu room is empty.** Its scenery was removed because it used game textures. See `wrapper/MODIFICATIONS.md`.
+- **Pico headsets aren't supported right now.** The PICO SDK was removed until its license is checked.
+- **Some parts are prebuilt binaries, not built here:**
+  - the native libraries in `pojlib/src/main/jniLibs/`
+  - `pojlib/src/main/assets/lwjgl/lwjgl-glfw-classes.jar`
+  - `pojlib/libs/unity-classes.jar`
+
+  [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) says where each one comes from.
+- **The game isn't in the APK.** On first launch the app downloads the game, Java, Fabric, Vivecraft and the default mods. The live lists of versions and mods come from `pojlib/` on this repo's `main` branch.
 
 ## CI
 
-`.github/workflows/build-pojlib.yml` builds the Pojlib AAR on every push and
-uploads it as an artifact. Building the Unity APK in CI needs a Unity license
-secret (for example with GameCI), so it isn't set up yet.
+`.github/workflows/build-pojlib.yml` builds `pojlib/` on every push and uploads the AAR. CI doesn't build the Unity APK yet, because that needs a Unity license secret (for example through GameCI).

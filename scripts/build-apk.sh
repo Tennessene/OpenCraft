@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Build the OpenCraft APK from the Unity wrapper in batch mode.
 #
-# Needs: Unity 2022.3.60f1 with "Android Build Support" (incl. OpenJDK,
+# Needs: Unity 2022.3.62f3 (2022 LTS) with "Android Build Support" (incl. OpenJDK,
 #        Android SDK & NDK Tools) installed through Unity Hub, and a
 #        signed-in Unity account (a free Personal license works).
 #
 # Optional env:
 #   UNITY            path to the Unity binary
-#   OPENCRAFT_APK    output path (default: build/OpenCraft-6.0.0.apk)
+#   OPENCRAFT_APK    output path (default: build/OpenCraft.apk)
 #   OPENCRAFT_KEYSTORE, OPENCRAFT_KEYSTORE_PASS, OPENCRAFT_KEY_ALIAS,
 #   OPENCRAFT_KEY_PASS   sign with your own keystore (otherwise Unity's
 #                        debug key is used)
@@ -15,16 +15,16 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 ROOT="$PWD"
 
-UNITY_VERSION=2022.3.60f1
+UNITY_VERSION=2022.3.62f3
 : "${UNITY:=/Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity}"
 if [ ! -x "$UNITY" ]; then
   echo "Unity $UNITY_VERSION not found at $UNITY. Install it from Unity Hub" >&2
-  echo "(Installs > Install Editor > Archive > 2022.3.60f1, add Android Build Support)," >&2
+  echo "(Installs > Install Editor > Archive > $UNITY_VERSION, add Android Build Support)," >&2
   echo "or set UNITY=/path/to/Unity." >&2
   exit 1
 fi
 
-export OPENCRAFT_APK="${OPENCRAFT_APK:-$ROOT/build/OpenCraft-6.0.0.apk}"
+export OPENCRAFT_APK="${OPENCRAFT_APK:-$ROOT/build/OpenCraft.apk}"
 mkdir -p "$(dirname "$OPENCRAFT_APK")"
 
 # Drop the build entry point into the Unity project for this run only.

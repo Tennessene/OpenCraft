@@ -1,6 +1,0 @@
-[submodule "pojlib"]
-	path = pojlib
-	url = https://github.com/QuestCraftPlusPlus/Pojlib.git
-[submodule "wrapper"]
-	path = wrapper
-	url = https://github.com/QuestCraftPlusPlus/QCXR-XR-Wrapper.git

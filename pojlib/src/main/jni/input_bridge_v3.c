@@ -1,4 +1,4 @@
-// Modified for OpenCraft (2026-11-26): JNI_OnLoad skips the GLFW stand-in setup when the game JVM has no GLFW class (26.x versions use SDL3).
+// Modified for OpenCraft (2026-11-26): JNI_OnLoad skips the GLFW stand-in setup when the game JVM has no GLFW class (26.x versions use SDL3), and marks SDL3 as ready to initialise.
 /*
  * V3 input bridge implementation.
  *
@@ -15,6 +15,7 @@
 #include <dlfcn.h>
 #include <jni.h>
 #include <libgen.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdatomic.h>
@@ -59,6 +60,21 @@ jint JNI_OnLoad(JavaVM* vm, __attribute__((unused)) void* reserved) {
             (*pojav_environ->runtimeJNIEnvPtr_JRE)->ExceptionClear(pojav_environ->runtimeJNIEnvPtr_JRE);
             __android_log_print(ANDROID_LOG_INFO, "Native", "No GLFW stand-in in the game JVM (SDL3 game version); skipping GLFW setup");
             pojav_environ->vmGlfwClass = NULL;
+            // On Android SDL3 refuses SDL_Init until SDL_SetMainReady() is called, which SDL's own
+            // activity would normally do. LWJGL later opens this same file, so it sees the flag.
+            const char* nativeDir = getenv("POJLIB_NATIVEDIR");
+            if (nativeDir != NULL) {
+                char sdlPath[1024];
+                snprintf(sdlPath, sizeof(sdlPath), "%s/libSDL3.so", nativeDir);
+                void* sdl = dlopen(sdlPath, RTLD_NOW | RTLD_GLOBAL);
+                void (*setMainReady)(void) = sdl ? (void (*)(void)) dlsym(sdl, "SDL_SetMainReady") : NULL;
+                if (setMainReady != NULL) {
+                    setMainReady();
+                    __android_log_print(ANDROID_LOG_INFO, "Native", "Called SDL_SetMainReady for %s", sdlPath);
+                } else {
+                    __android_log_print(ANDROID_LOG_WARN, "Native", "Could not call SDL_SetMainReady: %s", dlerror());
+                }
+            }
         } else {
         pojav_environ->vmGlfwClass = (*pojav_environ->runtimeJNIEnvPtr_JRE)->NewGlobalRef(pojav_environ->runtimeJNIEnvPtr_JRE, glfwClass);
         pojav_environ->method_glftSetWindowAttrib = (*pojav_environ->runtimeJNIEnvPtr_JRE)->GetStaticMethodID(pojav_environ->runtimeJNIEnvPtr_JRE, pojav_environ->vmGlfwClass, "glfwSetWindowAttrib", "(JII)V");

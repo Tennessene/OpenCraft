@@ -16,6 +16,11 @@ cd "$(dirname "$0")/.."
 ROOT="$PWD"
 
 UNITY_VERSION=2022.3.62f3
+if [ -z "${UNITY:-}" ]; then
+  for base in /Applications/Unity/Hub/Editor "$HOME/Applications/Unity/Hub/Editor" /Applications/Unity; do
+    [ -x "$base/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity" ] && UNITY="$base/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity" && break
+  done
+fi
 : "${UNITY:=/Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity}"
 if [ ! -x "$UNITY" ]; then
   echo "Unity $UNITY_VERSION not found at $UNITY. Install it from Unity Hub" >&2

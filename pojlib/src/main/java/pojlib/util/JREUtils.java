@@ -267,6 +267,8 @@ public class JREUtils {
             userArgs.add("-Dorg.lwjgl.sdl.libname=" + activity.getApplicationInfo().nativeLibraryDir + "/libSDL3.so");
             // the bundled LWJGL 3.4.1 natives don't include jemalloc
             userArgs.add("-Dorg.lwjgl.system.allocator=system");
+            // Java 25 probes NUMA with get_mempolicy, which Android's app seccomp filter forbids (SIGSYS)
+            userArgs.add("-XX:-UseNUMA");
         }
         userArgs.add("-Dorg.lwjgl.opengles.libname=" + "/system/lib64/libGLESv3.so");
         userArgs.add("-Dorg.lwjgl.egl.libname=" + "/system/lib64/libEGL_dri.so");

@@ -69,7 +69,7 @@ Built from `pojlib/src/main/jni` when you build Pojlib: `libpojavexec.so`, `libv
 
 | Component | Where | License | Source |
 |---|---|---|---|
-| Vivecraft with OpenXR, merged with its 26.3 port | `vivecraft/`, built into a mod jar that's downloaded at runtime | LGPL-3.0 (its LICENSE.md also lists component licenses) | https://github.com/Vivecraft/VivecraftMod branches `openxr` @ `13eafae1` and `Multiloader-26.3` @ `fee45104`; changes in `vivecraft/MODIFICATIONS.md` |
+| Vivecraft with OpenXR, merged with its 26.3 port | `vivecraft/`, built into a mod jar that `scripts/build-apks.sh` packs inside the APK (bundled) | LGPL-3.0 (its LICENSE.md also lists component licenses) | https://github.com/Vivecraft/VivecraftMod branches `openxr` @ `13eafae1` and `Multiloader-26.3` @ `fee45104`; changes in `vivecraft/MODIFICATIONS.md` |
 | LWJGL 3.4.1 jars and arm64 natives (Android build) | `pojlib/src/main/assets/lwjgl/3.4.1/`, bundled | BSD-3-Clause | https://github.com/AngelAuraMC/lwjgl3, taken prebuilt from https://github.com/AngelAuraMC/Amethyst-Android (LGPL-3.0 repo) |
 | Patched LWJGL core (`lwjgl.jar`) and OpenGL classes (`lwjgl-opengl.jar`) | same | BSD-3-Clause (UNVERIFIED for Amethyst's Android patches inside them) | as above |
 | FreeType (`libfreetype.so`) | same, natives | UNVERIFIED (FreeType License or GPL-2.0, dual) | https://freetype.org |

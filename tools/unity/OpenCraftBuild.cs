@@ -26,6 +26,14 @@ public static class OpenCraftBuild
             PlayerSettings.Android.useCustomKeystore = false;
         }
 
+        // Optional per-build identity, so builds from different branches can be installed side by side
+        string appId = Environment.GetEnvironmentVariable("OPENCRAFT_APP_ID");
+        if (!string.IsNullOrEmpty(appId))
+            PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, appId);
+        string appName = Environment.GetEnvironmentVariable("OPENCRAFT_APP_NAME");
+        if (!string.IsNullOrEmpty(appName))
+            PlayerSettings.productName = appName;
+
         EditorUserBuildSettings.buildAppBundle = false;
 
         var options = new BuildPlayerOptions

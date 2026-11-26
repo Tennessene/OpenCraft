@@ -21,6 +21,15 @@ Each part is a modified copy of an upstream LGPL-3.0 project. Its `MODIFICATIONS
   - Unity **2022.3.62f3** (2022 LTS), with the Android Build Support module (tick OpenJDK and Android SDK & NDK Tools)
   - a Unity account signed in to Unity Hub (a free Personal license works)
 
+## Quick way: build every branch at once
+
+```bash
+./scripts/build-apks.sh            # builds main and mc-26.3 into build/apks/
+./scripts/build-apks.sh --install  # same, then installs them on a headset connected over USB
+```
+
+The script takes the Pojlib AAR that CI built for each branch's latest pushed commit, so you don't need the Android NDK. It builds a branch's own Vivecraft (if it has `vivecraft/`), puts the jar inside the AAR, then runs Unity. Each branch gets its own app ID, so the APKs install side by side. You'll need `gh` signed in, and a JDK 17+ for Vivecraft.
+
 ## Steps
 
 ```bash

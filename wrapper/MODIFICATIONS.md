@@ -51,3 +51,7 @@ The C# scripts that changed carry a `// Modified for OpenCraft` line at the top.
 - `OpenCraft/branding/make_images.py`: generates the images listed above.
 
 The menu scene has **not** been opened in Unity since these changes. Objects that pointed at the removed scenery now have missing references and won't draw. The menu should still load, but it will look empty until new scenery is added.
+
+## 2026-11-26 (later)
+
+- **Added** `Assets/OpenCraft/OpenCraftLoaderFeature.cs`, an original OpenXR feature that does nothing at runtime. It declares a custom runtime loader for Android, so Unity's OpenXR package leaves its own `openxr_loader.aar` out of the APK and Pojlib's loader is the only one. Upstream got the same result as a side effect of the PICO SDK's `PICOFeature`, which is now removed. OpenCraft's build hook (`tools/unity/OpenCraftBuild.cs`, outside this folder) enables the feature for Android before each build.

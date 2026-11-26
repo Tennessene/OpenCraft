@@ -34,6 +34,21 @@ public static class OpenCraftBuild
         if (!string.IsNullOrEmpty(appName))
             PlayerSettings.productName = appName;
 
+        // Only one OpenXR loader may ship: the launcher library's. Turning on this feature
+        // tells Unity's OpenXR package to leave its own loader out (see OpenCraftLoaderFeature).
+        UnityEditor.XR.OpenXR.Features.FeatureHelpers.RefreshFeatures(BuildTargetGroup.Android);
+        var xrSettings = UnityEngine.XR.OpenXR.OpenXRSettings.GetSettingsForBuildTargetGroup(BuildTargetGroup.Android);
+        var loaderFeature = xrSettings != null ? xrSettings.GetFeature<OpenCraft.OpenCraftLoaderFeature>() : null;
+        if (loaderFeature == null)
+        {
+            Console.WriteLine("OpenCraft: OpenCraftLoaderFeature not found in the Android OpenXR settings");
+            EditorApplication.Exit(1);
+            return;
+        }
+        loaderFeature.enabled = true;
+        EditorUtility.SetDirty(xrSettings);
+        AssetDatabase.SaveAssets();
+
         EditorUserBuildSettings.buildAppBundle = false;
 
         var options = new BuildPlayerOptions

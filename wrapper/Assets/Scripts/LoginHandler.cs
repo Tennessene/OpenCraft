@@ -1,4 +1,4 @@
-// Modified for OpenCraft (2026-11-26): no longer creates an empty launcher.conf, and copes when the config is missing.
+// Modified for OpenCraft (2026-11-26): no longer creates an empty launcher.conf, and copes when the config is missing; the button-only copy skips start-up account handling.
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
@@ -31,6 +31,9 @@ public class LoginHandler : MonoBehaviour
     public void Start()
     {
 	    configPath = Application.persistentDataPath + "/launcher.conf";
+	    // The scene has a second LoginHandler on a button that only receives clicks; it has
+	    // no dropdown, so it skips the start-up account handling.
+	    if (accountDropdown == null) return;
 	    // ConfigHandler (run from JNIStorage, which starts first) writes the config; read it if it's there.
 	    configFile = File.Exists(configPath) ? File.ReadAllText(configPath) : "";
 	    config = JsonConvert.DeserializeObject<ConfigHandler.Config>(configFile)

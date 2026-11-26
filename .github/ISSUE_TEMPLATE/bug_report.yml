@@ -1,0 +1,55 @@
+name: Bug report
+description: Something in OpenCraft doesn't work the way it should
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please check the open issues first in case someone already filed this one.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What went wrong?
+      description: Say what you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How can we make it happen again?
+      placeholder: |
+        1. Open the launcher
+        2. Pick version ...
+        3. ...
+  - type: input
+    id: opencraft-version
+    attributes:
+      label: OpenCraft version or commit
+      placeholder: e.g. 6.0.0, or a commit hash if you built it yourself
+    validations:
+      required: true
+  - type: input
+    id: game-version
+    attributes:
+      label: Game version you launched
+      placeholder: e.g. 1.21.4
+  - type: dropdown
+    id: headset
+    attributes:
+      label: Headset
+      options:
+        - Quest 2
+        - Quest 3
+        - Quest 3S
+        - Quest Pro
+        - Pico 4 / 4 Ultra
+        - Pico Neo 3
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: Paste the link from the launcher's Need Help? button, or attach latestlog.txt.
+      render: text

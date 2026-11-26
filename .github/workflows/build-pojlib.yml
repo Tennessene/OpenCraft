@@ -1,0 +1,39 @@
+name: Build Pojlib
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          lfs: true
+
+      - name: Pull Pojlib LFS files
+        run: git -C pojlib lfs pull
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: temurin
+
+      - uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r26b
+          link-to-sdk: true
+
+      - name: Build Pojlib AAR
+        run: ./scripts/build-pojlib.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Pojlib-release
+          path: pojlib/build/outputs/aar/*.aar

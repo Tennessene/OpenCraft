@@ -1,0 +1,19 @@
+name: Feature idea
+description: Suggest something OpenCraft could do
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like OpenCraft to do?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why would it help?
+      description: The problem it solves, or what it would make easier.
+  - type: textarea
+    id: other-ideas
+    attributes:
+      label: Other ways you've thought of

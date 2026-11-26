@@ -73,7 +73,7 @@ for BR in "${BRANCHES[@]}"; do
   fi
 
   # 2. The Pojlib AAR CI built for this commit. Wait if that run is still going.
-  RUN="$(gh run list -R "$REPO" --branch "$BR" --workflow build.yml --limit 20 \
+  RUN="$(gh run list -R "$REPO" --branch "$BR" --limit 30 \
         --json databaseId,headSha --jq "[.[] | select(.headSha == \"$SHA\")][0].databaseId // empty")"
   [ -n "$RUN" ] || { echo "No CI run for $BR at ${SHA:0:7}. Push the branch and let CI finish, then run this again." >&2; exit 1; }
   gh run watch "$RUN" -R "$REPO" --exit-status > /dev/null || { echo "CI run $RUN for $BR failed." >&2; exit 1; }

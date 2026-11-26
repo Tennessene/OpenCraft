@@ -1,3 +1,4 @@
+// Modified for OpenCraft (2026-11-26): Java 25 runtime install for 26.x versions; LWJGL jars no longer added here.
 package pojlib.install;
 
 import android.app.Activity;
@@ -29,6 +30,36 @@ import java.util.concurrent.TimeUnit;
 //This class reads data from a game version json and downloads its contents.
 //This works for the base game as well as mod loaders
 public class Installer {
+
+    // Added for OpenCraft: installs the runtime a given game version needs. 26.x versions get Java 25
+    // in runtimes/JRE25; older versions keep using the JRE.zip download below.
+    public static void installJVM(Activity activity, boolean force, GameRuntime runtime) {
+        String tarXz = runtime.jreTarXzUrl();
+        if (tarXz == null) {
+            installJVM(activity, force);
+            return;
+        }
+        File home = runtime.jreHome(activity);
+        Logger.getInstance().appendToLog("Checking Java " + runtime.javaMajor + " runtime");
+        try {
+            if (!new File(home, "release").exists() || force) {
+                Logger.getInstance().appendToLog("Installing Java " + runtime.javaMajor + " runtime");
+                FileUtils.deleteDirectory(home);
+                home.mkdirs();
+                File archive = new File(activity.getFilesDir(), "runtimes/JRE" + runtime.javaMajor + ".tar.xz");
+                DownloadUtils.downloadFile(tarXz, archive);
+                DownloadManager.reset();
+                TarXz.extract(archive, home);
+                archive.delete();
+                Files.copy(Paths.get(activity.getApplicationInfo().nativeLibraryDir + "/libawt_xawt.so"),
+                        Paths.get(home + "/lib/libawt_xawt.so"), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
+            Logger.getInstance().appendToLog("Java " + runtime.javaMajor + " runtime installed");
+        } catch (IOException e) {
+            Logger.getInstance().appendToLog("Failed to install Java " + runtime.javaMajor + " runtime: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
     public static void installJVM(Activity activity, boolean force) {
         Logger.getInstance().appendToLog("Checking JRE");
@@ -134,8 +165,8 @@ public class Installer {
                 }
             }
 
-            // Add our GLFW
-            classpath.add(Constants.USER_HOME + "/lwjgl3/lwjgl-glfw-classes.jar");
+            // OpenCraft: the LWJGL jars are added by UnityPlayerActivity.installLWJGL, which knows
+            // whether this version uses the GLFW stand-in (up to 1.21.x) or LWJGL 3.4 + SDL3 (26.x).
             // DNS SRV Resolver fix
             classpath.add(Constants.USER_HOME + "/hacks/ResConfHack.jar");
 

@@ -18,3 +18,6 @@ bin
 .classpath
 .project
 /.cxx
+
+# OpenCraft: built by scripts/build-sdl3.sh
+src/main/jniLibs/arm64-v8a/libSDL3.so

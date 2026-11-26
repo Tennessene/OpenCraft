@@ -1,0 +1,65 @@
+package org.vivecraft.mixin.client_vr.renderer;
+
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelEventHandler;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.LevelEvent;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.vivecraft.client.network.ClientNetworking;
+import org.vivecraft.client_vr.ClientDataHolderVR;
+import org.vivecraft.client_vr.VRState;
+
+@Mixin(LevelEventHandler.class)
+public class LevelEventHandlerVRMixin {
+    @Shadow
+    @Final
+    private Minecraft minecraft;
+
+    @Inject(at = @At("HEAD"), method = "levelEvent")
+    private void vivecraft$shakeOnSound(int type, BlockPos pos, int data, CallbackInfo ci) {
+        boolean playerNearAndVR = VRState.VR_RUNNING && this.minecraft.player != null &&
+            this.minecraft.player.isAlive() && this.minecraft.player.blockPosition().distSqr(pos) < 25.0D;
+        if (playerNearAndVR) {
+            switch (type) {
+                /* pre 1.19.4, they are now separate
+                case LevelEvent.LevelEvent.SOUND_CLOSE_IRON_DOOR,
+                        LevelEvent.SOUND_CLOSE_WOODEN_DOOR,
+                        LevelEvent.SOUND_CLOSE_WOODEN_TRAP_DOOR,
+                        LevelEvent.SOUND_CLOSE_FENCE_GATE,
+                        LevelEvent.SOUND_CLOSE_IRON_TRAP_DOOR
+                        -> ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 250);
+                 */
+                case LevelEvent.SOUND_ZOMBIE_WOODEN_DOOR,
+                     LevelEvent.SOUND_ZOMBIE_IRON_DOOR,
+                     LevelEvent.SOUND_ZOMBIE_DOOR_CRASH -> {
+                    ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 750);
+                    ClientDataHolderVR.getInstance().vr.triggerHapticPulse(1, 750);
+                }
+                case LevelEvent.SOUND_ANVIL_USED -> ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 500);
+                case LevelEvent.SOUND_ANVIL_LAND -> {
+                    ClientDataHolderVR.getInstance().vr.triggerHapticPulse(0, 1250);
+                    ClientDataHolderVR.getInstance().vr.triggerHapticPulse(1, 1250);
+                }
+            }
+        }
+    }
+
+    @WrapWithCondition(method = "levelEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;addBreakingBlockEffects(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;Z)V"))
+    private boolean vivecraft$noEffectForRoomscale(
+        ClientLevel instance, BlockPos pos, Direction direction,
+        boolean playSound)
+    {
+        // block the event if it matches the roomscale hit and the server doesn't correctly handle it
+        return !VRState.VR_RUNNING ||
+            ClientNetworking.SERVER_SUPPORTS_ROOMSCALE_ATTACK_PACKET ||
+            !ClientDataHolderVR.getInstance().swingTracker.matchesLastHit(pos, direction);
+    }
+}

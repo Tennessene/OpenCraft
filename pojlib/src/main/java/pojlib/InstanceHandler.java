@@ -1,4 +1,4 @@
-// Modified for OpenCraft (2026-11-26): mod lists are read from the OpenCraft repository.
+// Modified for OpenCraft (2026-11-26): mod lists are read from the OpenCraft repository; LWJGL build is chosen per game version.
 package pojlib;
 
 import android.app.Activity;
@@ -183,7 +183,7 @@ public class InstanceHandler {
                 CompletableFuture<String> minecraftClasspath = Installer.installLibraries(minecraftVersionInfo, gameDir);
                 CompletableFuture<String> modLoaderClasspath = Installer.installLibraries(finalModLoaderVersionInfo, gameDir);
                 CompletableFuture<String> assetsFuture = Installer.installAssets(minecraftVersionInfo, gameDir);
-                String lwjgl = UnityPlayerActivity.installLWJGL(activity);
+                String lwjgl = UnityPlayerActivity.installLWJGL(activity, pojlib.util.GameRuntime.forVersion(minecraftVersionInfo));
 
                 CompletableFuture<Void> installFuture = CompletableFuture.allOf(clientClasspath, minecraftClasspath, modLoaderClasspath, assetsFuture);
                 installFuture.get();

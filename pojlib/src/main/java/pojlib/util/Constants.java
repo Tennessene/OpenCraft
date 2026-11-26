@@ -27,7 +27,7 @@ public class Constants {
 
     public static final String MINOTAR_URL = "https://minotar.net";
     // Branch of github.com/Tennessene/OpenCraft whose pojlib/ folder holds the live mod and version lists
-    public static final String GIT_BRANCH = "main";
+    public static final String GIT_BRANCH = "mc-26.3";
     public static final String POJLIB_RAW_URL = "https://raw.githubusercontent.com/Tennessene/OpenCraft/refs/heads/" + GIT_BRANCH + "/pojlib";
     public static String USER_HOME;
 

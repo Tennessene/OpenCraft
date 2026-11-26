@@ -1,3 +1,4 @@
+// Modified for OpenCraft (2026-11-26): installs LWJGL 3.4.1 and its natives for 26.x versions.
 package pojlib;
 
 import static android.os.Build.VERSION.SDK_INT;
@@ -31,6 +32,8 @@ import com.unity3d.player.IUnityPlayerLifecycleEvents;
 import com.unity3d.player.UnityPlayer;
 
 import org.lwjgl.glfw.CallbackBridge;
+import pojlib.util.GameRuntime;
+import java.util.StringJoiner;
 
 import java.io.File;
 import java.io.IOException;
@@ -118,6 +121,45 @@ public class UnityPlayerActivity extends ActivityGroup implements IUnityPlayerLi
                 .remapDpad(true));
 
         CallbackBridge.nativeSetUseInputStackQueue(true);
+    }
+
+    // Added for OpenCraft: picks the LWJGL build for a game version. 26.x versions get LWJGL 3.4.1
+    // (with SDL3 bindings) unpacked from assets/lwjgl/3.4.1, older ones keep the GLFW stand-in jar.
+    // Returns the classpath entries to add for the game.
+    public static String installLWJGL(Activity activity, GameRuntime runtime) throws IOException {
+        String folder = runtime.lwjglAssetFolder();
+        if (folder == null) {
+            return installLWJGL(activity);
+        }
+        Logger.getInstance().appendToLog("Checking LWJGL " + folder);
+        File jarDir = new File(Constants.USER_HOME + "/lwjgl3-" + folder);
+        File nativeDir = runtime.lwjglNativesDir(activity);
+        StringJoiner classpath = new StringJoiner(File.pathSeparator);
+        String[] jars = activity.getAssets().list("lwjgl/" + folder);
+        // lwjgl.jar first, so its core classes win over any copies inside other jars
+        java.util.Arrays.sort(jars, (x, y) -> x.equals("lwjgl.jar") ? -1 : y.equals("lwjgl.jar") ? 1 : x.compareTo(y));
+        for (String name : jars) {
+            if (!name.endsWith(".jar")) continue;
+            File target = new File(jarDir, name);
+            copyAssetIfChanged(activity, "lwjgl/" + folder + "/" + name, target);
+            classpath.add(target.getAbsolutePath());
+        }
+        for (String name : activity.getAssets().list("lwjgl/" + folder + "/natives")) {
+            File target = new File(nativeDir, name);
+            copyAssetIfChanged(activity, "lwjgl/" + folder + "/natives/" + name, target);
+            target.setReadable(true, false);
+            target.setExecutable(true, false);
+        }
+        Logger.getInstance().appendToLog("LWJGL " + folder + " installed");
+        return classpath.toString();
+    }
+
+    private static void copyAssetIfChanged(Activity activity, String asset, File target) throws IOException {
+        byte[] bytes = FileUtil.loadFromAssetToByte(activity, asset);
+        if (target.exists() && FileUtil.matchingAssetFile(target, bytes)) return;
+        Objects.requireNonNull(target.getParentFile()).mkdirs();
+        target.delete();
+        FileUtil.write(target.getAbsolutePath(), bytes);
     }
 
     public static String installLWJGL(Activity activity) throws IOException {

@@ -65,6 +65,24 @@ Built from `pojlib/src/main/jni` when you build Pojlib: `libpojavexec.so`, `libv
 | Fabric API, ModernFix and the default performance mods (from Modrinth) | Various, one per mod (UNVERIFIED each). Listed in `pojlib/mods.json` | https://modrinth.com |
 | The game itself | Proprietary (Mojang). Never bundled: you need your own copy | https://www.minecraft.net |
 
+## Added on the `mc-26.3` branch (26.x support)
+
+| Component | Where | License | Source |
+|---|---|---|---|
+| Vivecraft with OpenXR, merged with its 26.3 port | `vivecraft/`, built into a mod jar that's downloaded at runtime | LGPL-3.0 (its LICENSE.md also lists component licenses) | https://github.com/Vivecraft/VivecraftMod branches `openxr` @ `13eafae1` and `Multiloader-26.3` @ `fee45104`; changes in `vivecraft/MODIFICATIONS.md` |
+| LWJGL 3.4.1 jars and arm64 natives (Android build) | `pojlib/src/main/assets/lwjgl/3.4.1/`, bundled | BSD-3-Clause | https://github.com/AngelAuraMC/lwjgl3, taken prebuilt from https://github.com/AngelAuraMC/Amethyst-Android (LGPL-3.0 repo) |
+| Patched LWJGL core (`lwjgl.jar`) and OpenGL classes (`lwjgl-opengl.jar`) | same | BSD-3-Clause (UNVERIFIED for Amethyst's Android patches inside them) | as above |
+| FreeType (`libfreetype.so`) | same, natives | UNVERIFIED (FreeType License or GPL-2.0, dual) | https://freetype.org |
+| shaderc (`libshaderc.so`) | same, natives | UNVERIFIED (probably Apache-2.0) | https://github.com/google/shaderc |
+| libspng (inside `liblwjgl_spng.so`) | same, natives | UNVERIFIED (probably BSD-2-Clause) | https://github.com/randy408/libspng |
+| Vulkan Memory Allocator (inside `liblwjgl_vma.so`) | same, natives | UNVERIFIED (probably MIT) | https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator |
+| tinyfiledialogs (inside `liblwjgl_tinyfd.so`) | same, natives | UNVERIFIED (probably zlib) | https://sourceforge.net/projects/tinyfiledialogs |
+| SDL 3.4.20 (`libSDL3.so`) | built from source by `pojlib/scripts/build-sdl3.sh`, bundled | Zlib | https://github.com/libsdl-org/SDL |
+| Java 25 runtime | downloaded at runtime | GPL-2.0 with Classpath Exception (read from the archive's `legal/java.base/LICENSE`). The build repo has no license file | https://github.com/AngelAuraMC/angelauramc-openjdk-build release `download_jre25` |
+| Apache Commons Compress | bundled (Java) | Apache-2.0 | https://github.com/apache/commons-compress |
+| XZ for Java | bundled (Java) | 0BSD | https://github.com/tukaani-project/xz-java |
+| Fabric API 0.167.0+26.3 | downloaded at runtime | UNVERIFIED | https://modrinth.com/mod/fabric-api |
+
 ## Removed from OpenCraft
 
 | Component | Why | When |

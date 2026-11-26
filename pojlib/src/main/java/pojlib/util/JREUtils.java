@@ -1,4 +1,4 @@
-// Modified for OpenCraft (2026-11-26): client brand name is OpenCraft.
+// Modified for OpenCraft (2026-11-26): client brand name is OpenCraft; Java runtime, LWJGL natives and SDL3 settings are chosen per game version; the runtime is installed before the environment reads it.
 package pojlib.util;
 
 import android.app.Activity;
@@ -30,6 +30,7 @@ import pojlib.API;
 
 import pojlib.UnityPlayerActivity;
 import pojlib.install.Installer;
+import pojlib.install.VersionInfo;
 import pojlib.install.MinecraftMeta;
 import pojlib.util.json.MinecraftInstances;
 
@@ -40,6 +41,9 @@ public class JREUtils {
     public static String jvmLibraryPath;
     private static String sNativeLibDir;
     private static String runtimeDir;
+    // OpenCraft: the game version being launched decides which Java runtime and LWJGL build are used
+    private static GameRuntime gameRuntime = GameRuntime.forVersion(null);
+    private static String jreHome;
 
     public static String findInLdLibPath(String libName) {
         if(Os.getenv("LD_LIBRARY_PATH")==null) {
@@ -145,7 +149,7 @@ public class JREUtils {
     public static void relocateLibPath(final Context ctx, MinecraftInstances.Instance instance) {
         sNativeLibDir = ctx.getApplicationInfo().nativeLibraryDir;
 
-        LD_LIBRARY_PATH = ctx.getFilesDir() + "/runtimes/JRE/bin:" + ctx.getFilesDir() + "/runtimes/JRE/lib:" +
+        LD_LIBRARY_PATH = jreHome + "/bin:" + jreHome + "/lib:" +
                 "/system/lib64:/vendor/lib64:/vendor/lib64/hw:" + ctx.getDataDir().toPath().resolve(instance.instanceName) + ":" +
                 sNativeLibDir;
     }
@@ -153,7 +157,7 @@ public class JREUtils {
     public static void setJavaEnvironment(Activity activity, MinecraftInstances.Instance instance) throws Throwable {
         Map<String, String> envMap = new ArrayMap<>();
         envMap.put("POJLIB_NATIVEDIR", activity.getApplicationInfo().nativeLibraryDir);
-        envMap.put("JAVA_HOME", activity.getFilesDir() + "/runtimes/JRE");
+        envMap.put("JAVA_HOME", jreHome);
         envMap.put("HOME", instance.gameDir);
         //envMap.put("APP_HOME", Constants.USER_HOME);
         envMap.put("TMPDIR", activity.getCacheDir().getAbsolutePath());
@@ -162,7 +166,15 @@ public class JREUtils {
         envMap.put("MG_DIR_PATH", activity.getFilesDir() + "/mg");
 
         envMap.put("LD_LIBRARY_PATH", LD_LIBRARY_PATH);
-        envMap.put("PATH", activity.getFilesDir() + "/runtimes/JRE/bin:" + Os.getenv("PATH"));
+        envMap.put("PATH", jreHome + "/bin:" + Os.getenv("PATH"));
+        if (gameRuntime.usesSdl) {
+            // 26.x draws through SDL3. Its offscreen driver makes an EGL context without a window,
+            // and both GL and EGL go through MobileGlues so the game gets desktop OpenGL on GLES.
+            String nativeDir = activity.getApplicationInfo().nativeLibraryDir;
+            envMap.put("SDL_VIDEO_DRIVER", "offscreen");
+            envMap.put("SDL_OPENGL_LIBRARY", nativeDir + "/" + loadGraphicsLibrary());
+            envMap.put("SDL_EGL_LIBRARY", nativeDir + "/" + loadGraphicsLibrary());
+        }
 
         File mg = new File(activity.getFilesDir() + "/mg");
         mg.mkdirs();
@@ -184,8 +196,8 @@ public class JREUtils {
             Os.setenv(env.getKey(), env.getValue(), true);
         }
 
-        File serverFile = new File(activity.getFilesDir() + "/runtimes/JRE/lib/server/libjvm.so");
-        jvmLibraryPath = activity.getFilesDir() + "/runtimes/JRE/lib/" + (serverFile.exists() ? "server" : "client");
+        File serverFile = new File(jreHome + "/lib/server/libjvm.so");
+        jvmLibraryPath = jreHome + "/lib/" + (serverFile.exists() ? "server" : "client");
         Log.d("DynamicLoader","Base LD_LIBRARY_PATH: "+LD_LIBRARY_PATH);
         Log.d("DynamicLoader","Internal LD_LIBRARY_PATH: "+jvmLibraryPath+":"+LD_LIBRARY_PATH);
         setLdLibraryPath(jvmLibraryPath+":"+LD_LIBRARY_PATH);
@@ -193,18 +205,23 @@ public class JREUtils {
 
     // Called before game launch to ensure all files are present and correct
     public static boolean prelaunchCheck(Activity activity, MinecraftInstances.Instance instance) throws Throwable {
-        runtimeDir = activity.getFilesDir() + "/runtimes/JRE";
+        VersionInfo vanilla = MinecraftMeta.getVersionInfo(instance.versionName);
+        gameRuntime = GameRuntime.forVersion(vanilla);
+        jreHome = gameRuntime.jreHome(activity).getAbsolutePath();
+        runtimeDir = jreHome;
+
+        // Install the runtime before reading it, so a first launch finds lib/server/libjvm.so
+        Installer.installJVM(activity, false, gameRuntime);
         JREUtils.relocateLibPath(activity, instance);
         setJavaEnvironment(activity, instance);
 
-        UnityPlayerActivity.installLWJGL(activity);
-        Installer.installClient(MinecraftMeta.getVersionInfo(instance.versionName), Constants.USER_HOME).get();
-        Installer.installLibraries(MinecraftMeta.getVersionInfo(instance.versionName), Constants.USER_HOME).get();
-        Installer.installAssets(MinecraftMeta.getVersionInfo(instance.versionName), Constants.USER_HOME).get();
+        UnityPlayerActivity.installLWJGL(activity, gameRuntime);
+        Installer.installClient(vanilla, Constants.USER_HOME).get();
+        Installer.installLibraries(vanilla, Constants.USER_HOME).get();
+        Installer.installAssets(vanilla, Constants.USER_HOME).get();
 
-        Installer.installJVM(activity, false);
         if(!initJavaRuntime()) {
-            Installer.installJVM(activity, true);
+            Installer.installJVM(activity, true, gameRuntime);
             return initJavaRuntime();
         }
 
@@ -246,6 +263,11 @@ public class JREUtils {
         userArgs.add("-XX:+DisableExplicitGC");
 
         userArgs.add("-Dorg.lwjgl.opengl.libname=" + graphicsLib);
+        if (gameRuntime.usesSdl) {
+            userArgs.add("-Dorg.lwjgl.sdl.libname=" + activity.getApplicationInfo().nativeLibraryDir + "/libSDL3.so");
+            // the bundled LWJGL 3.4.1 natives don't include jemalloc
+            userArgs.add("-Dorg.lwjgl.system.allocator=system");
+        }
         userArgs.add("-Dorg.lwjgl.opengles.libname=" + "/system/lib64/libGLESv3.so");
         userArgs.add("-Dorg.lwjgl.egl.libname=" + "/system/lib64/libEGL_dri.so");
 
@@ -309,13 +331,15 @@ public class JREUtils {
             Logger.getInstance().appendToLog("Couldn't write DNS servers! " + e.getMessage());
         }
         return new ArrayList<>(Arrays.asList(
-                "-Djava.home=" + new File(ctx.getFilesDir(), "runtimes/JRE"),
+                "-Djava.home=" + jreHome,
                 "-Djava.io.tmpdir=" + ctx.getCacheDir().getAbsolutePath(),
                 "-Duser.home=" + instance.gameDir,
                 "-Duser.language=" + System.getProperty("user.language"),
                 "-Dos.name=Linux",
                 "-Dos.version=Android-" + Build.VERSION.RELEASE,
-                "-Dorg.lwjgl.librarypath=" + ctx.getApplicationInfo().nativeLibraryDir,
+                "-Dorg.lwjgl.librarypath=" + (gameRuntime.usesSdl
+                        ? gameRuntime.lwjglNativesDir(ctx).getAbsolutePath() + File.pathSeparator + ctx.getApplicationInfo().nativeLibraryDir
+                        : ctx.getApplicationInfo().nativeLibraryDir),
                 "-Djna.boot.library.path=" + ctx.getApplicationInfo().nativeLibraryDir,
                 "-Djna.nosys=true",
                 "-Djava.library.path=" + ctx.getApplicationInfo().nativeLibraryDir,

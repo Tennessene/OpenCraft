@@ -1,3 +1,4 @@
+// Modified for OpenCraft (2026-11-26): reads the javaVersion block from version metadata.
 package pojlib.install;
 
 import com.google.gson.annotations.SerializedName;
@@ -19,6 +20,14 @@ public class VersionInfo {
     public Arguments arguments;
     @SerializedName("assets")
     public String assets;
+    // Java runtime the version was built for, e.g. {"component": "java-runtime-epsilon", "majorVersion": 25}
+    @SerializedName("javaVersion")
+    public JavaVersion javaVersion;
+
+    public static class JavaVersion {
+        @SerializedName("majorVersion")
+        public int majorVersion;
+    }
 
     public static class AssetIndex {
         @SerializedName("id")

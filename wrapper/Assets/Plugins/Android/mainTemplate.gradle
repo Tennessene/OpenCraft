@@ -5,6 +5,11 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation(name: "Pojlib-release", ext: "aar")
 
+    // OpenCraft: Unity 2022.3's dexer (D8 4.0.52) crashes on some newer jars: xz 1.10,
+    // json-smart 2.5.1 (from msal4j 1.17.2), commons-lang3 3.16 (from commons-compress 1.27)
+    // and error_prone_annotations 2.36 (from gson). The versions below avoid them, and the
+    // annotations are compile-time only, so they're left out.
+    configurations.all { exclude group: "com.google.errorprone", module: "error_prone_annotations" }
     // OpenCraft: an AAR doesn't carry its dependencies, so every library Pojlib uses at
     // runtime is listed here. Keep this in step with pojlib/build.gradle.
     implementation("com.google.guava:guava:31.0.1-jre")
@@ -14,11 +19,11 @@ dependencies {
     implementation("commons-codec:commons-codec:1.15")
     implementation("androidx.annotation:annotation:1.7.1")
     implementation("androidx.core:core:1.13.1")
-    implementation("com.microsoft.azure:msal4j:1.17.2")
+    implementation("com.microsoft.azure:msal4j:1.17.0")
     implementation("com.github.Mathias-Boulay:android_gamepad_remapper:2.0.3")
     // used by Pojlib to unpack the Java 25 runtime for 26.x game versions
-    implementation("org.apache.commons:commons-compress:1.27.1")
-    implementation("org.tukaani:xz:1.10")
+    implementation("org.apache.commons:commons-compress:1.21")
+    implementation("org.tukaani:xz:1.9")
 **DEPS**}
 
 android {

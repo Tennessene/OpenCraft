@@ -24,7 +24,7 @@ public final class TarXz {
              TarArchiveInputStream tar = new TarArchiveInputStream(new XZCompressorInputStream(raw))) {
             TarArchiveEntry entry;
             byte[] buffer = new byte[64 * 1024];
-            while ((entry = tar.getNextEntry()) != null) {
+            while ((entry = tar.getNextTarEntry()) != null) {
                 File out = new File(destination, entry.getName());
                 // refuse entries that would land outside the destination folder
                 if (!(out.getCanonicalPath() + File.separator).startsWith(root) && !out.getCanonicalPath().equals(destination.getCanonicalPath())) {

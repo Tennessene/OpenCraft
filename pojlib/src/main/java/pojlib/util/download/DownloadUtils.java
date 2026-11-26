@@ -1,4 +1,4 @@
-// Modified for OpenCraft (2026-11-26): downloads identify themselves as OpenCraft.
+// Modified for OpenCraft (2026-11-26): downloads identify themselves as OpenCraft; "bundled:" links install files shipped in the APK.
 package pojlib.util.download;
 
 import org.apache.commons.codec.binary.Hex;
@@ -51,8 +51,27 @@ public class DownloadUtils {
         downloadFile(url, out, -1);
     }
 
+    // OpenCraft: links written as "bundled:<name>" are copied from the APK's assets/bundled/<name>
+    // instead of being downloaded, so a build can ship a file (like its own Vivecraft) without hosting it.
+    public static final String BUNDLED_PREFIX = "bundled:";
+
     public static void downloadFile(String url, File out, long size) throws IOException {
         Objects.requireNonNull(out.getParentFile()).mkdirs();
+        if (url.startsWith(BUNDLED_PREFIX)) {
+            String asset = "bundled/" + url.substring(BUNDLED_PREFIX.length());
+            if (pojlib.util.Constants.APP_CONTEXT == null) throw new IOException("App context not set; cannot read " + asset);
+            File part = File.createTempFile(out.getName(), ".part", out.getParentFile());
+            try (InputStream in = pojlib.util.Constants.APP_CONTEXT.getAssets().open(asset);
+                 OutputStream os = new BufferedOutputStream(Files.newOutputStream(part.toPath()))) {
+                IOUtils.copy(in, os);
+            } catch (IOException e) {
+                part.delete();
+                throw e;
+            }
+            if (!part.renameTo(out)) { part.delete(); throw new IOException("Could not move " + asset + " into place"); }
+            Logger.getInstance().appendToLog("Installed bundled file " + asset);
+            return;
+        }
         File tempOut = File.createTempFile(out.getName(), ".part", out.getParentFile());
         try {
             try (OutputStream bos2 = new BufferedOutputStream(Files.newOutputStream(tempOut.toPath()))) {

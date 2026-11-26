@@ -42,3 +42,4 @@ Older versions behave exactly as before.
   - `src/main/assets/lwjgl/3.4.1/`: LWJGL 3.4.1 jars.
   - `src/main/assets/lwjgl/3.4.1/natives/`: arm64 natives.
   - `lwjgl-opengl.jar` is repacked from Amethyst's `lwjgl-3.4.1-merged-modules.jar`, without its `glfw` and `sdl` packages (which call into Amethyst's launcher) and its module descriptor.
+- `src/main/java/pojlib/util/download/DownloadUtils.java`, `util/Constants.java`: a mod link written as `bundled:<name>` is copied from the APK's `assets/bundled/<name>` instead of downloaded. `Constants` keeps the app context for this. The 26.3 Vivecraft entry in `mods.json` now uses `bundled:vivecraft-26.3.jar`. `scripts/build-apks.sh` builds that jar from `vivecraft/` and adds it to the AAR, so nothing has to be hosted.

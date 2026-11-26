@@ -1,4 +1,4 @@
-// Modified for OpenCraft (2026-11-26): version and mod lists are read from the OpenCraft repository.
+// Modified for OpenCraft (2026-11-26): version and mod lists are read from the OpenCraft repository; keeps the app context for bundled files.
 package pojlib.util;
 
 import android.app.Activity;
@@ -30,8 +30,11 @@ public class Constants {
     public static final String GIT_BRANCH = "mc-26.3";
     public static final String POJLIB_RAW_URL = "https://raw.githubusercontent.com/Tennessene/OpenCraft/refs/heads/" + GIT_BRANCH + "/pojlib";
     public static String USER_HOME;
+    // OpenCraft: kept so files shipped inside the APK (assets/bundled/) can be installed like downloads
+    public static android.content.Context APP_CONTEXT;
 
     public static void initConstants(Activity activity) {
         USER_HOME = activity.getExternalFilesDir(null).getAbsolutePath();
+        APP_CONTEXT = activity.getApplicationContext();
     }
 }

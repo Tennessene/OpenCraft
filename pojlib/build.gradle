@@ -50,7 +50,7 @@ dependencies {
     implementation("commons-codec:commons-codec:1.15")
     implementation("androidx.annotation:annotation:1.7.1")
     implementation("androidx.core:core:1.13.1")
-    implementation("com.microsoft.azure:msal4j:1.17.2")
+    implementation("com.microsoft.azure:msal4j:1.17.0")
     implementation("com.github.Mathias-Boulay:android_gamepad_remapper:2.0.3")
     implementation("blank:unity-classes")
 }

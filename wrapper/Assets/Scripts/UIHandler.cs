@@ -1,3 +1,4 @@
+// Modified for OpenCraft (2026-11-26): agreement Continue button unlocks at the end of the text instead of a fixed offset.
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -154,7 +155,13 @@ public class UIHandler : MonoBehaviour
 
     public void UpdateLegalButton()
     {
-        if (legalContent.transform.localPosition.y > 6800f)
+        // Unlock once the text has been scrolled to the bottom, or straight away if it fits
+        // without scrolling. (Upstream checked a fixed 6800px offset sized for its long EULA.)
+        var scroll = legalContent.GetComponentInParent<ScrollRect>();
+        var content = legalContent.GetComponent<RectTransform>();
+        bool fits = scroll == null || content == null || scroll.viewport == null
+                    || content.rect.height <= scroll.viewport.rect.height + 1f;
+        if (fits || scroll.verticalNormalizedPosition <= 0.01f)
         {
             legalContinue.interactable = true;
         }

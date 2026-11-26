@@ -1,3 +1,4 @@
+// Modified for OpenCraft (2026-11-26): an empty or unreadable launcher.conf is replaced with defaults instead of crashing.
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
@@ -16,10 +17,17 @@ public class ConfigHandler : MonoBehaviour
     {
         configPath = Application.persistentDataPath + "/launcher.conf";
         
+        Config existing = null;
         if (File.Exists(configPath))
-        { 
-            string configFile = File.ReadAllText(configPath);
-            config = JsonConvert.DeserializeObject<Config>(configFile);
+        {
+            try { existing = JsonConvert.DeserializeObject<Config>(File.ReadAllText(configPath)); }
+            catch (JsonException) { existing = null; }
+        }
+
+        if (existing != null)
+        {
+            config = existing;
+            if (config.accounts == null) config.accounts = new List<Accounts>();
             
             if (!config.acceptedLegal) { windowHandler.LegalSetter(); }
             if (config.setDevMods) { devHandler._devToggle.isOn = true; }

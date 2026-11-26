@@ -47,3 +47,10 @@ This folder is OpenCraft's copy of [QCXR-XR-Wrapper](https://github.com/QuestCra
   - Versions are chosen so Unity 2022.3's dexer (D8 4.0.52) can process them: MSAL4J 1.17.0, Commons Compress 1.21, XZ 1.9, no `error_prone_annotations`.
 - `Assets/Plugins/Android/gradleTemplate.properties`: Jetifier skips the Pojlib AAR. It can't read the Java 25 classes Pojlib carries for 26.x versions, and Pojlib has no old support-library code to rewrite anyway.
 - `.gitignore`: the build backup folder uses the new product name.
+
+## Start-up fixes
+
+- `Assets/Scripts/JNIStorage.cs`: runs first (`[DefaultExecutionOrder(-100)]`), so Pojlib, the Android activity and the config are ready before other scripts use them. Before this, sign-in could start before Pojlib was set up.
+- `Assets/Scripts/ConfigHandler.cs`: an empty or unreadable `launcher.conf` gets replaced with defaults instead of crashing start-up, which also stopped versions and instances from loading.
+- `Assets/Scripts/LoginHandler.cs`: no longer creates an empty `launcher.conf` (the cause of the above), and copes when the config is missing.
+- `Assets/Scripts/UIHandler.cs`, `Assets/Scripts/WindowHandler.cs`: the agreement's Continue button unlocks once the text is scrolled to the end, or straight away if it fits. Upstream checked a fixed scroll offset sized for its long EULA.

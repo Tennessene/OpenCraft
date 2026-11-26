@@ -46,6 +46,25 @@ public static class OpenCraftBuild
             return;
         }
         loaderFeature.enabled = true;
+
+        // Quest controllers. Upstream only enabled PICO's controller profiles (from the PICO SDK,
+        // which OpenCraft can't ship), so turn on Unity's own Meta Quest Touch profiles instead.
+        var controllerProfiles = new UnityEngine.XR.OpenXR.Features.OpenXRFeature[]
+        {
+            xrSettings.GetFeature<UnityEngine.XR.OpenXR.Features.Interactions.OculusTouchControllerProfile>(),
+            xrSettings.GetFeature<UnityEngine.XR.OpenXR.Features.Interactions.MetaQuestTouchPlusControllerProfile>(),
+            xrSettings.GetFeature<UnityEngine.XR.OpenXR.Features.Interactions.MetaQuestTouchProControllerProfile>(),
+        };
+        foreach (var profile in controllerProfiles)
+        {
+            if (profile == null)
+            {
+                Console.WriteLine("OpenCraft: a Meta Quest controller profile is missing from the Android OpenXR settings");
+                EditorApplication.Exit(1);
+                return;
+            }
+            profile.enabled = true;
+        }
         EditorUtility.SetDirty(xrSettings);
         AssetDatabase.SaveAssets();
 

@@ -5,11 +5,20 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation(name: "Pojlib-release", ext: "aar")
 
+    // OpenCraft: an AAR doesn't carry its dependencies, so every library Pojlib uses at
+    // runtime is listed here. Keep this in step with pojlib/build.gradle.
     implementation("com.google.guava:guava:31.0.1-jre")
-    implementation("commons-io:commons-io:2.11.0")
+    implementation("com.google.code.gson:gson:2.12.1")
+    implementation("org.apache.commons:commons-math3:3.6.1")
+    implementation("commons-io:commons-io:2.13.0")
     implementation("commons-codec:commons-codec:1.15")
-    implementation("com.microsoft.azure:msal4j:1.17.0")
+    implementation("androidx.annotation:annotation:1.7.1")
+    implementation("androidx.core:core:1.13.1")
+    implementation("com.microsoft.azure:msal4j:1.17.2")
     implementation("com.github.Mathias-Boulay:android_gamepad_remapper:2.0.3")
+    // used by Pojlib to unpack the Java 25 runtime for 26.x game versions
+    implementation("org.apache.commons:commons-compress:1.27.1")
+    implementation("org.tukaani:xz:1.10")
 **DEPS**}
 
 android {
